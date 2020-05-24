@@ -20,5 +20,16 @@ export default class {
         this.passive = true
     }
 
+    public onOffer(sdp: RTCSessionDescription) {
+        this.conn.onOffer(sdp)
+    }
+
+    public onAnswer(sdp: RTCSessionDescription) {
+        this.conn.onAnswer(sdp)
+    }
+
+    public onCandidate(candidate: RTCIceCandidate) {
+        this.conn.onCandidate(candidate)
+    }
 }
 

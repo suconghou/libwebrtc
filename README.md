@@ -147,8 +147,25 @@ peer3等待事件 signal , 然后通过ws发送signal给ws的ID是3的用户,并
         走策略1
 
 
+在 ICE 处理中
+
+里面还分为 iceGatheringState 和 iceConnectionState
+
+iceGatheringState: 用来检测本地 candidate 的状态。其有以下三种状态：
+
+new: 该 candidate 刚刚被创建
+
+gathering: ICE 正在收集本地的 candidate
+
+complete: ICE 完成本地 candidate 的收集
+
+iceConnectionState: 用来检测远端 candidate 的状态。远端的状态比较复杂，一共有 7 种: new/checking/connected/completed/failed/disconnected/closed
 
 
+
+iceGatheringState -> ready 
+
+iceConnectionState -> new 
 
 
 

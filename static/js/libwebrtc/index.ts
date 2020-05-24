@@ -19,7 +19,13 @@ export default class {
 	init() {
 		ws()
 			.listen('offer', (data: any) => {
-				console.info(data)
+				this.onOffer(data)
+			})
+			.listen("answer", (data: any) => {
+				this.onAnswer(data)
+			})
+			.listen("candidate", (data: any) => {
+				this.onCandidate(data)
 			})
 			.listen('online', (data: any) => {
 				this.connectId(data.id)
@@ -30,7 +36,17 @@ export default class {
 	}
 
 	private onOffer(data: any) {
+		console.info("我收到offer,应该设置")
+		this.m.onOffer(data.from, data.data)
+	}
 
+
+	private onAnswer(data: any) {
+		this.m.onAnswer(data.from, data.data)
+	}
+
+	private onCandidate(data: any) {
+		this.m.onCandidate(data.from, data.data)
 	}
 
 	private connectId(id: string) {
