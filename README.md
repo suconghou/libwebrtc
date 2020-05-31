@@ -169,3 +169,9 @@ iceConnectionState -> new
 
 
 
+
+1. 建立起datachannel √
+2. 统计信息
+    广播API
+    单个发送API
+3. 

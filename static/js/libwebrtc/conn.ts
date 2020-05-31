@@ -12,13 +12,13 @@ export default class {
     private init() {
         this.c = new RTCPeerConnection(this.servers);
         this.c.onnegotiationneeded = async (ev: Event) => {
-            console.info(ev)
+            console.log(ev)
             try {
                 const offer = await this.c.createOffer();
                 await this.c.setLocalDescription(offer)
                 // send sdp to ws server
                 ws().sendJson({ event: 'offer', to: this.id, from: uuid(), data: offer })
-                console.info(offer)
+                console.log(offer)
                 // wait for remote sdp and then set 
                 // this.c.setRemoteDescription(offer)
 
@@ -34,22 +34,22 @@ export default class {
 
         }
         this.c.onconnectionstatechange = (ev: Event) => {
-            console.info(ev)
+            console.log(ev)
         }
         this.c.onicecandidateerror = (ev: RTCPeerConnectionIceErrorEvent) => {
-            console.info(ev)
+            console.log(ev)
         }
 
         this.c.onicegatheringstatechange = (ev: Event) => {
-            console.info(ev)
+            console.log(ev)
         }
 
         this.c.oniceconnectionstatechange = (ev: Event) => {
-            console.info(ev)
+            console.log(ev)
         }
 
         this.c.onicecandidate = (ev) => {
-            console.info("onicecandidate", ev)
+            console.log("onicecandidate", ev)
             if (ev.candidate) {
                 const data = {
                     event: 'candidate',
@@ -58,14 +58,14 @@ export default class {
                     data: ev.candidate
                 }
                 ws().sendJson(data)
-                console.info("send candidate", data)
+                console.log("send candidate", data)
             }
         }
     }
 
     // 我主动链接这个ID
     async connect() {
-        console.info("i connect ", this.id)
+        console.log("i connect ", this.id)
         this.init()
         this.dc = this.c.createDataChannel("dc")
         this.dcInit()
@@ -73,17 +73,16 @@ export default class {
 
     private dcInit() {
         this.dc.onopen = (e) => {
-            console.info("dc open", e)
-            this.dc.send("hello world, " + this.id + " , i am " + uuid())
+            console.warn("dc open me : " + uuid() + " remote: " + this.id, e)
         }
         this.dc.onclose = e => {
-            console.info("dc close", e)
+            console.log("dc close", e)
         }
         this.dc.onerror = e => {
-            console.info("dc error", e)
+            console.log("dc error", e)
         }
         this.dc.onmessage = e => {
-            console.info("dc msg", e)
+            console.log("dc msg", e)
         }
     }
 
@@ -97,20 +96,29 @@ export default class {
             to: this.id,
             data: answer,
         }
-        console.info("send", data)
+        console.log("send", data)
         ws().sendJson(data)
     }
 
     public async onAnswer(sdp: RTCSessionDescription) {
         await this.c.setRemoteDescription(sdp)
-        console.info(this.dc)
+        console.log(this.dc)
         // 设置后,链接建立完毕
     }
 
     public async onCandidate(candidate: RTCIceCandidate) {
         this.c.addIceCandidate(candidate)
-        console.info("made connection ", this.id)
+        console.log("made connection ", this.id)
 
+    }
+
+
+    send(data: any) {
+        if (!this.dc) {
+            console.error("data channel to " + this.id + " is not avaiable")
+            return
+        }
+        return this.dc.send(data)
     }
 
 

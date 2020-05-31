@@ -79,4 +79,23 @@ export default class {
         s.onCandidate(candidate)
     }
 
+
+    sendTo(uuid: string, data: any) {
+        const s = streams.get(uuid)
+        if (!s) {
+            console.error("uuid " + uuid + " not connected")
+        }
+        return s.send(data)
+    }
+
+    broadcast(data: any) {
+        streams.forEach(item => {
+            item.send(data)
+        })
+    }
+
+    getPeers() {
+        return streams.keys()
+    }
+
 }

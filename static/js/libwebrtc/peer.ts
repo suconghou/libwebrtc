@@ -31,5 +31,10 @@ export default class {
     public onCandidate(candidate: RTCIceCandidate) {
         this.conn.onCandidate(candidate)
     }
+
+    send(data: any) {
+        return this.conn.send(data)
+    }
+
 }
 

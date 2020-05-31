@@ -10,12 +10,6 @@ export default class {
 		this.m = new manager(servers)
 	}
 
-	initChannel() {
-		// this.conn = new conn(this.servers)
-		// this.channel = new channel(this.conn.getConn(), "name1")
-
-	}
-
 	init() {
 		ws()
 			.listen('offer', (data: any) => {
@@ -33,6 +27,22 @@ export default class {
 			.listen('init', (data: any) => {
 				this.waitForIds(data.ids)
 			})
+	}
+
+	// 向外暴露API
+
+	// 单个发送
+	sendTo(uuid: string, data: any) {
+		return this.m.sendTo(uuid, data)
+	}
+
+	// 广播
+	broadcast(data: any) {
+		return this.m.broadcast(data)
+	}
+
+	getPeers() {
+		return this.m.getPeers();
 	}
 
 	private onOffer(data: any) {
