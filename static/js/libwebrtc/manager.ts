@@ -1,23 +1,32 @@
 import { peerConn, peerState } from './types'
 import peer from './peer'
-import { ws } from './util/util'
+import event from './util/event'
 
 const streams = new Map<string, peer>()
 
-export default class {
-
+export default class extends event {
 
     constructor(private readonly servers: RTCConfiguration) {
-
+        super()
     }
 
     private createPassive(uid: string) {
-        const s = new peer(uid, true, this.servers);
+        const s = new peer(uid, true, this.servers, (e: MessageEvent) => {
+            this.trigger("message", {
+                uid,
+                e,
+            })
+        });
         streams.set(uid, s)
     }
 
     private createPositive(uid: string) {
-        const s = new peer(uid, false, this.servers)
+        const s = new peer(uid, false, this.servers, (e: MessageEvent) => {
+            this.trigger("message", {
+                uid,
+                e,
+            })
+        })
         streams.set(uid, s)
     }
 
@@ -97,5 +106,15 @@ export default class {
     getPeers() {
         return streams.keys()
     }
+
+    getStats() {
+        const stat = {};
+        streams.forEach(item => {
+            stat[item.id] = item.stat()
+        })
+        return stat;
+    }
+
+
 
 }

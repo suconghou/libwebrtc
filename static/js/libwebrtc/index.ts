@@ -1,13 +1,17 @@
-import { ws } from './util/util'
-import conn from './conn'
-import channel from './channel'
+import { ws, uuid } from './util/util'
+import event from './util/event'
 import manager from './manager'
 
-export default class {
+export default class extends event {
 	private m: manager
-
+	public id: string
 	constructor(private readonly servers: RTCConfiguration) {
+		super()
 		this.m = new manager(servers)
+		this.m.register("message", (e) => {
+			this.trigger("message", e)
+		})
+		this.id = uuid()
 	}
 
 	init() {
@@ -44,6 +48,12 @@ export default class {
 	getPeers() {
 		return this.m.getPeers();
 	}
+
+	getStats() {
+		return this.m.getStats()
+	}
+
+
 
 	private onOffer(data: any) {
 		console.info("我收到offer,应该设置")

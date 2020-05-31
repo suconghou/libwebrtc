@@ -5,7 +5,11 @@ export default class {
 
     private dc: RTCDataChannel;
 
-    constructor(private readonly id: string, private readonly servers: RTCConfiguration) {
+    private tx: number = 0
+
+    private rx: number = 0
+
+    constructor(private readonly id: string, private readonly servers: RTCConfiguration, private readonly onmsg: Function) {
         this.init()
     }
 
@@ -82,7 +86,8 @@ export default class {
             console.log("dc error", e)
         }
         this.dc.onmessage = e => {
-            console.log("dc msg", e)
+            this.rx += e.data.length
+            this.onmsg(e)
         }
     }
 
@@ -118,8 +123,20 @@ export default class {
             console.error("data channel to " + this.id + " is not avaiable")
             return
         }
-        return this.dc.send(data)
+        if (this.dc.readyState !== 'open') {
+            console.error("data channel to " + this.id + " is not open")
+            return
+        }
+        const r = this.dc.send(data)
+        this.tx += data.length
+        return r
     }
 
+    stat() {
+        return {
+            tx: this.tx,
+            rx: this.rx
+        }
+    }
 
 }

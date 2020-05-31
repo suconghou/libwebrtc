@@ -1,13 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
-		<title>WebRtc</title>
-		<link rel="stylesheet" href="./static/css/style.less" />
-	</head>
-	<body>
-		<script src="./static/js/main.js"></script>
-	</body>
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+	<title>WebRtc</title>
+	<link rel="stylesheet" href="./static/css/style.less" />
+</head>
+
+<body>
+	<div id="app">
+		<div class="wrapper">
+			<div class="message-list">
+				<div class="items-list">
+
+					<div v-for="item in items">
+						<div class="message-item">
+							<div class="message-meta">
+								<span>{{item.time}}</span>
+								<span>{{item.uid}}</span>
+							</div>
+							<div class="message-content" v-text="item.text">
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<div class="send">
+					<div class="single" v-if="this.to">
+						<span class="to-uid">
+							单聊{{to}}
+						</span>
+						<svg @click="remove" class="icon" viewBox="0 0 1024 1024" version="1.1"
+							xmlns="http://www.w3.org/2000/svg">
+							<path
+								d="M563.8 512l262.5-312.9c4.4-5.2 0.7-13.1-6.1-13.1h-79.8c-4.7 0-9.2 2.1-12.3 5.7L511.6 449.8 295.1 191.7c-3-3.6-7.5-5.7-12.3-5.7H203c-6.8 0-10.5 7.9-6.1 13.1L459.4 512 196.9 824.9c-4.4 5.2-0.7 13.1 6.1 13.1h79.8c4.7 0 9.2-2.1 12.3-5.7l216.5-258.1 216.5 258.1c3 3.6 7.5 5.7 12.3 5.7h79.8c6.8 0 10.5-7.9 6.1-13.1L563.8 512z"
+								p-id="1150"></path>
+						</svg>
+					</div>
+
+					<textarea class="txt" v-model="txt" @keydown.enter.prevent.stop="send"></textarea>
+					<br>
+				</div>
+			</div>
+			<div class="member-list">
+				<div v-for="item in members" :key="item">
+					<div class="member" @click="toIt(item)">{{item}}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="./static/js/main.js"></script>
+	<script src="https://lib.baomitu.com/vue/2.6.11/vue.min.js"></script>
+	<script>
+		const app = new Vue({
+			el: '#app',
+			data() {
+				return {
+					items: [],
+					members: [],
+					txt: "",
+					to: "",
+				}
+			},
+			methods: {
+				send() {
+					if (!this.txt) {
+						return;
+					}
+					if (this.to) {
+						rtc.sendTo(this.to, this.txt)
+					} else {
+						rtc.broadcast(this.txt)
+					}
+					this.items.push({
+						uid: rtc.id,
+						text: this.txt,
+						time: new Date(),
+					})
+					this.txt = ''
+
+				},
+				toIt(item) {
+					this.to = item
+				},
+				remove() {
+					this.to = ''
+				}
+			}
+		});
+		const getMembers = () => {
+			const peers = rtc.getPeers()
+			const members = []
+			for (let item of peers) {
+				members.push(item)
+			}
+			app.members = members
+		}
+		setInterval(getMembers, 3000)
+		rtc.register("message", (e) => {
+			app.items.push({
+				uid: e.uid,
+				text: e.e.data,
+				time: new Date(),
+			})
+		})
+
+	</script>
+</body>
+
 </html>
