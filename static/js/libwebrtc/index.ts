@@ -1,6 +1,8 @@
-import { ws, uuid } from './util/util'
+import { ws, uuid, concatArrayBuffers } from './util/util'
 import event from './util/event'
 import manager from './manager'
+
+const s = 102400
 
 export default class extends event {
 	private m: manager
@@ -53,7 +55,41 @@ export default class extends event {
 		return this.m.getStats()
 	}
 
+	sendBuffer(data: ArrayBuffer) {
+		const datas = this.splitBuffer(data)
+		console.info(datas)
+	}
 
+	broadcastBuffer(data: ArrayBuffer) {
+		const datas = this.splitBuffer(data)
+		console.info(datas)
+	}
+
+	private splitBuffer(data: ArrayBuffer) {
+		let i = 0;
+		let last = false;
+		const datas = [];
+		while (true) {
+			const start = s * i;
+			let end = s * (i + 1)
+			if (end >= data.byteLength) {
+				end = data.byteLength
+				last = true
+			}
+			const v = data.slice(start, end)
+			const t = new ArrayBuffer(0);
+			datas.push({
+				start,
+				end,
+				i,
+				data: concatArrayBuffers(t, v)
+			})
+			i++
+			if (last) {
+				return datas;
+			}
+		}
+	}
 
 	private onOffer(data: any) {
 		this.m.onOffer(data.from, data.data)

@@ -42,3 +42,27 @@ const logevel = sessionStorage.getItem('loglevel') || 'warn'
 export const warn = ['warn', 'info', 'log'].includes(logevel) ? console.warn.bind(console) : () => { }
 export const info = ['info', 'log'].includes(logevel) ? console.info.bind(console) : () => { }
 export const log = ['log'].includes(logevel) ? console.log.bind(console) : () => { }
+
+export const concatArrayBuffers = (buffer1: ArrayBuffer, buffer2: ArrayBuffer): ArrayBuffer => {
+    if (!buffer1) {
+        return buffer2;
+    } else if (!buffer2) {
+        return buffer1;
+    }
+    const tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
+    tmp.set(new Uint8Array(buffer1), 0);
+    tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
+    return tmp.buffer;
+};
+
+export const ab2str = (buf: ArrayBuffer) => {
+    return String.fromCharCode.apply(null, new Uint16Array(buf));
+}
+export const str2ab = (str: string) => {
+    var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+    var bufView = new Uint16Array(buf);
+    for (var i = 0, strLen = str.length; i < strLen; i++) {
+        bufView[i] = str.charCodeAt(i);
+    }
+    return buf;
+}
