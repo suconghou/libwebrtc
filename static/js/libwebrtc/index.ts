@@ -56,7 +56,6 @@ export default class extends event {
 
 
 	private onOffer(data: any) {
-		console.info("我收到offer,应该设置")
 		this.m.onOffer(data.from, data.data)
 	}
 

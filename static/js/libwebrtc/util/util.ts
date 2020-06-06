@@ -26,13 +26,19 @@ export const uuid = () => {
     if (uid) {
         return uid;
     }
-    uid = sessionStorage.getItem('uid')
-    if (!uid) {
+    uid = localStorage.getItem('uid')
+    if (!uid || uid.length != 36) {
         function S4() {
-            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+            return (((1 + Math.random()) * 0x10000) | 0).toString(36)
         }
         uid = (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-        sessionStorage.setItem('uid', uid)
+        localStorage.setItem('uid', uid)
     }
     return uid
 }
+
+const logevel = sessionStorage.getItem('loglevel') || 'warn'
+
+export const warn = ['warn', 'info', 'log'].includes(logevel) ? console.warn.bind(console) : () => { }
+export const info = ['info', 'log'].includes(logevel) ? console.info.bind(console) : () => { }
+export const log = ['log'].includes(logevel) ? console.log.bind(console) : () => { }

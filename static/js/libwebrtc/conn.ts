@@ -1,4 +1,4 @@
-import { ws, uuid } from './util/util'
+import { ws, uuid, warn, info, log } from './util/util'
 
 export default class {
     private c: RTCPeerConnection
@@ -16,16 +16,13 @@ export default class {
     private init() {
         this.c = new RTCPeerConnection(this.servers);
         this.c.onnegotiationneeded = async (ev: Event) => {
-            console.log(ev)
+            log(ev)
             try {
                 const offer = await this.c.createOffer();
                 await this.c.setLocalDescription(offer)
                 // send sdp to ws server
                 ws().sendJson({ event: 'offer', to: this.id, from: uuid(), data: offer })
-                console.log(offer)
-                // wait for remote sdp and then set 
-                // this.c.setRemoteDescription(offer)
-
+                log(offer)
             } catch (e) {
                 console.error(e)
             }
@@ -38,22 +35,22 @@ export default class {
 
         }
         this.c.onconnectionstatechange = (ev: Event) => {
-            console.log(ev)
+            log(ev)
         }
         this.c.onicecandidateerror = (ev: RTCPeerConnectionIceErrorEvent) => {
-            console.log(ev)
+            log(ev)
         }
 
         this.c.onicegatheringstatechange = (ev: Event) => {
-            console.log(ev)
+            log(ev)
         }
 
         this.c.oniceconnectionstatechange = (ev: Event) => {
-            console.log(ev)
+            log(ev)
         }
 
         this.c.onicecandidate = (ev) => {
-            console.log("onicecandidate", ev)
+            log(ev)
             if (ev.candidate) {
                 const data = {
                     event: 'candidate',
@@ -62,14 +59,14 @@ export default class {
                     data: ev.candidate
                 }
                 ws().sendJson(data)
-                console.log("send candidate", data)
+                log("send candidate", data)
             }
         }
     }
 
     // 我主动链接这个ID
     async connect() {
-        console.log("i connect ", this.id)
+        log("i connect ", this.id)
         this.init()
         this.dc = this.c.createDataChannel("dc")
         this.dcInit()
@@ -77,17 +74,20 @@ export default class {
 
     private dcInit() {
         this.dc.onopen = (e) => {
-            console.warn("dc open me : " + uuid() + " remote: " + this.id, e)
+            warn("dc open me : " + uuid() + " remote: " + this.id, e)
+            this.onmsg('open', e);
         }
         this.dc.onclose = e => {
-            console.log("dc close", e)
+            warn("dc close " + this.id, e)
+            this.onmsg('close', e);
         }
         this.dc.onerror = e => {
-            console.log("dc error", e)
+            warn("dc error " + this.id, e)
+            this.onmsg('error', e);
         }
         this.dc.onmessage = e => {
             this.rx += e.data.length
-            this.onmsg(e)
+            this.onmsg('message', e)
         }
     }
 
@@ -101,30 +101,29 @@ export default class {
             to: this.id,
             data: answer,
         }
-        console.log("send", data)
+        log("send answer", data)
         ws().sendJson(data)
     }
 
     public async onAnswer(sdp: RTCSessionDescription) {
         await this.c.setRemoteDescription(sdp)
-        console.log(this.dc)
+        info('setRemoteDescription', sdp)
         // 设置后,链接建立完毕
     }
 
     public async onCandidate(candidate: RTCIceCandidate) {
         this.c.addIceCandidate(candidate)
-        console.log("made connection ", this.id)
-
+        info("made connection ", this.id)
     }
 
 
     send(data: any) {
         if (!this.dc) {
-            console.error("data channel to " + this.id + " is not avaiable")
+            warn("data channel to " + this.id + " is not avaiable")
             return
         }
         if (this.dc.readyState !== 'open') {
-            console.error("data channel to " + this.id + " is not open")
+            warn("data channel to " + this.id + " is not open")
             return
         }
         const r = this.dc.send(data)
@@ -135,7 +134,8 @@ export default class {
     stat() {
         return {
             tx: this.tx,
-            rx: this.rx
+            rx: this.rx,
+            state: this.dc.readyState,
         }
     }
 

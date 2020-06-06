@@ -18,6 +18,7 @@ export default class extends event {
             })
         });
         streams.set(uid, s)
+        s.waitForConnect()
     }
 
     private createPositive(uid: string) {
@@ -28,6 +29,7 @@ export default class extends event {
             })
         })
         streams.set(uid, s)
+        s.connect()
     }
 
     public ensureWaitIds(ids: Array<string>) {
@@ -49,7 +51,7 @@ export default class extends event {
             // 如果对方是断线重连,无论之前是他早于我上线(他链接的我),还是我早于他上线(我链接的他)
             // 再次上线后,都变成我主动链接他
             const s = streams.get(id)
-            if (s.state !== peerState.OK) {
+            if (s.state !== peerState.OPEN) {
                 s.connect()
             }
         } else {
@@ -63,7 +65,7 @@ export default class extends event {
     public async onOffer(from: string, sdp: RTCSessionDescription) {
         const s = streams.get(from)
         if (!s) {
-            console.error("peer error")
+            console.error("onOffer peer not found error")
             return
         }
         s.onOffer(sdp)
@@ -73,7 +75,7 @@ export default class extends event {
     public async onAnswer(from: string, sdp: RTCSessionDescription) {
         const s = streams.get(from)
         if (!s) {
-            console.error("peer error")
+            console.error("onAnswer peer not found error")
             return
         }
         s.onAnswer(sdp)
@@ -82,7 +84,7 @@ export default class extends event {
     public async onCandidate(from: string, candidate: RTCIceCandidate) {
         const s = streams.get(from)
         if (!s) {
-            console.error("peer error")
+            console.error("onCandidate peer not found error")
             return
         }
         s.onCandidate(candidate)

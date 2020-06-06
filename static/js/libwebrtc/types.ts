@@ -7,6 +7,7 @@ export interface peerConn {
 }
 
 export const enum peerState {
-    READY,
-    OK
+    OPEN,
+    CLOSE,
+    CONNECTING
 }
