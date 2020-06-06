@@ -107,6 +107,12 @@
 				time: new Date(),
 			})
 		})
+		rtc.register('buffer.recv', (e) => {
+			console.log(e)
+		})
+		rtc.register('buffer', (e) => {
+			console.log(e)
+		})
 
 	</script>
 </body>

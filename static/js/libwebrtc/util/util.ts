@@ -55,14 +55,22 @@ export const concatArrayBuffers = (buffer1: ArrayBuffer, buffer2: ArrayBuffer): 
     return tmp.buffer;
 };
 
-export const ab2str = (buf: ArrayBuffer) => {
+export const ab2str = (buf: ArrayBuffer): string => {
     return String.fromCharCode.apply(null, new Uint16Array(buf));
 }
-export const str2ab = (str: string) => {
+export const str2ab = (str: string): ArrayBuffer => {
     var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
     var bufView = new Uint16Array(buf);
     for (var i = 0, strLen = str.length; i < strLen; i++) {
         bufView[i] = str.charCodeAt(i);
     }
     return buf;
+}
+
+export const padRight = (str: string, max: number): string => {
+    const n = max - str.length
+    if (n > 0) {
+        return str + " ".repeat(n)
+    }
+    return str;
 }
