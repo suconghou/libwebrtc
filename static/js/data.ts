@@ -88,9 +88,16 @@ export default class extends libwebrtc {
 			}
 			u.push(uid)
 			clearTimeout(this.founderTimers[k])
-			this.founderTimers[k] = setTimeout(() => {
+			this.founderTimers[k] = setTimeout(async () => {
+				// 如果对方响应found很慢,我们已经持有了此资源,则忽略
+				const resolve = this.resolver.get(id)
+				if (resolve) {
+					const has = await resolve(id, index)
+					if (has) {
+						return
+					}
+				}
 				const rr = u[Math.floor(Math.random() * u.length)]
-				console.info(rr, 'resolve', id, index)
 				this.sendTo(rr, JSON.stringify({
 					event: 'resolve',
 					data: {
