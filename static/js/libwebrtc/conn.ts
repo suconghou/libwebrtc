@@ -92,6 +92,10 @@ export default class {
     }
 
     public async onOffer(sdp: RTCSessionDescription) {
+        if (this.c.signalingState == 'closed') {
+            warn("onOffer error signalingState is closed");
+            return
+        }
         await this.c.setRemoteDescription(sdp)
         const answer = await this.c.createAnswer()
         await this.c.setLocalDescription(answer)
@@ -112,6 +116,10 @@ export default class {
     }
 
     public async onCandidate(candidate: RTCIceCandidate) {
+        if (this.c.signalingState == 'closed') {
+            warn("onCandidate error signalingState is closed")
+            return
+        }
         this.c.addIceCandidate(candidate)
         info("made connection ", this.id)
     }

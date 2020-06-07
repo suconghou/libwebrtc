@@ -64,7 +64,6 @@ export default class extends event {
 				buffer: buffers,
 				uid,
 			})
-			console.info(this.buffers, c)
 			this.buffers.delete(id)
 		} catch (e) {
 			console.error(e)

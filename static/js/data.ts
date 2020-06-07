@@ -11,7 +11,8 @@ export default class extends libwebrtc {
 	private founders: Map<string, Array<string>> = new Map()
 	private founderTimers = {}
 	private queries: Map<string, Array<string>> = new Map()
-	constructor(servers: RTCConfiguration, private readonly resolve: Function) {
+	private resolver: Map<string, Function> = new Map()
+	constructor(servers: RTCConfiguration) {
 		super(servers)
 		this.register('message', (e) => {
 			const uid = e.uid;
@@ -26,8 +27,9 @@ export default class extends libwebrtc {
 		this.listen()
 	}
 
-	query(id: string, index: number) {
+	query(id: string, index: number, resolve: Function) {
 		this.founders.set(`${id}:${index}`, [])
+		this.resolver.set(id, resolve)
 		this.broadcast(JSON.stringify({
 			event: 'query',
 			data: {
@@ -38,8 +40,12 @@ export default class extends libwebrtc {
 	}
 
 	async found(id: string, index: number) {
+		const resolve = this.resolver.get(id)
+		if (!resolve) {
+			return
+		}
 		const k = `${id}:${index}`
-		const buffer: ArrayBuffer = await this.resolve(id, index)
+		const buffer: ArrayBuffer = await resolve(id, index)
 		if (buffer) {
 			this.refBuffers.set(k, buffer)
 			const u = this.queries.get(k)
@@ -62,7 +68,6 @@ export default class extends libwebrtc {
 
 	private listen() {
 		this.register('query', async ({ data, uid }) => {
-			console.log('query', data, uid)
 			const { id, index } = data
 			const k = `${id}:${index}`
 			const u = this.queries.get(k)
@@ -75,18 +80,15 @@ export default class extends libwebrtc {
 		})
 		this.register('found', ({ data, uid }) => {
 			// 多个客户响应了,选取前3个客户随机发送请求
-			console.log('found', data, uid)
 			const { id, index } = data
 			const k = `${id}:${index}`
 			let u = this.founders.get(k)
 			if (!u) {
-				console.info(this.founders)
 				return console.warn(k + " is already resolve")
 			}
 			u.push(uid)
 			clearTimeout(this.founderTimers[k])
 			this.founderTimers[k] = setTimeout(() => {
-				console.warn("send resolve", k)
 				this.sendTo(u[Math.floor(Math.random() * u.length)], JSON.stringify({
 					event: 'resolve',
 					data: {
@@ -95,11 +97,9 @@ export default class extends libwebrtc {
 					}
 				}))
 				this.founders.delete(k)
-				console.info(this.founders)
-			}, 0)
+			}, 100)
 		})
 		this.register('resolve', async ({ data, uid }) => {
-			console.log('resolve', data, uid)
 			const { id, index } = data
 			const buffer = this.refBuffers.get(`${id}:${index}`)
 			if (buffer) {
@@ -110,13 +110,11 @@ export default class extends libwebrtc {
 
 		this.register('buffer', ({ id, uid, buffer }) => {
 			const [idtag, index] = id.split('|')
-			console.warn(id, index)
 			this.trigger('data', {
 				id: idtag,
 				index,
 				buffer,
 			})
-			console.info(id, buffer, uid)
 		})
 	}
 
