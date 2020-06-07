@@ -23,9 +23,13 @@ export default class extends event {
 
 	private extract(data: ArrayBuffer, uid: string) {
 		try {
-			let meta = ab2str(data.slice(0, 60))
+			let meta = ab2str(data.slice(0, 60)).trim()
+			if (!/^[!-~]+$/.test(meta)) {
+				this.trigger('message.buffer', { data, uid })
+				return
+			}
 			const buffer = data.slice(60)
-			const [id, i, n] = JSON.parse(meta.trim())
+			const [id, i, n] = JSON.parse(meta)
 			const item = this.buffers.get(id)
 			if (item) {
 				item[i] = buffer
@@ -135,7 +139,7 @@ export default class extends event {
 			}
 			const v = data.slice(start, end)
 			let str = JSON.stringify([
-				id.substr(0, 15),
+				id.substr(0, 20),
 				i,
 				n,
 			]);

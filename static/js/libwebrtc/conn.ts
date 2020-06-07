@@ -135,7 +135,7 @@ export default class {
         return {
             tx: this.tx,
             rx: this.rx,
-            state: this.dc.readyState,
+            state: this.dc ? this.dc.readyState : '',
         }
     }
 
