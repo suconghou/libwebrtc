@@ -86,7 +86,11 @@ export default class {
             this.onmsg('error', e);
         }
         this.dc.onmessage = e => {
-            this.rx += e.data.length
+            if (e.data instanceof ArrayBuffer) {
+                this.rx += e.data.byteLength
+            } else {
+                this.rx += e.data.length
+            }
             this.onmsg('message', e)
         }
     }
@@ -135,7 +139,11 @@ export default class {
             return
         }
         const r = this.dc.send(data)
-        this.tx += data.length
+        if (data instanceof ArrayBuffer) {
+            this.tx += data.byteLength
+        } else {
+            this.tx += data.length
+        }
         return r
     }
 

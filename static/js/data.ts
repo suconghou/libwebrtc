@@ -109,7 +109,8 @@ export default class extends libwebrtc {
 		})
 
 		this.register('buffer', ({ id, uid, buffer }) => {
-			const [idtag, index] = id.split('|')
+			let [idtag, index] = id.split('|')
+			index = Number(index)
 			this.trigger('data', {
 				id: idtag,
 				index,
