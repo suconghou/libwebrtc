@@ -32,7 +32,7 @@ export default class {
             // 对方建立了 datachannel, 我方收到就维护起来
             this.dc = ev.channel
             this.dcInit()
-
+            log(ev)
         }
         this.c.onconnectionstatechange = (ev: Event) => {
             log(ev)
@@ -67,8 +67,16 @@ export default class {
     // 我主动链接这个ID
     async connect() {
         log("i connect ", this.id)
+        if (this.dc && this.dc.readyState == 'open') {
+            info("connection to ", this.id, " is already open")
+            return
+        }
         this.init()
         this.dc = this.c.createDataChannel("dc")
+        this.dc.binaryType = 'arraybuffer'
+        window.addEventListener('beforeunload', () => {
+            this.dc.close()
+        })
         this.dcInit()
     }
 
@@ -85,13 +93,18 @@ export default class {
             warn("dc error " + this.id, e)
             this.onmsg('error', e);
         }
-        this.dc.onmessage = e => {
-            if (e.data instanceof ArrayBuffer) {
-                this.rx += e.data.byteLength
-            } else {
-                this.rx += e.data.length
+        this.dc.onmessage = async (e) => {
+            let data = e.data;
+            if (data instanceof Blob) {
+                // 火狐浏览器始终是blob格式,这里修正
+                data = await e.data.arrayBuffer()
             }
-            this.onmsg('message', e)
+            if (data instanceof ArrayBuffer) {
+                this.rx += data.byteLength
+            } else {
+                this.rx += data.length
+            }
+            this.onmsg('message', { data })
         }
     }
 

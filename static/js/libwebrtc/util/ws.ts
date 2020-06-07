@@ -21,6 +21,7 @@ export class wsJson {
             return;
         }
         this.$ws = new WebSocket(this.addr);
+        this.$ws.binaryType = 'arraybuffer'
         this.$ws.onopen = (ev: Event) => {
             this.trigger('open', ev);
             this.stopconnect();

@@ -52,9 +52,7 @@ export default class extends event {
             // 如果对方是断线重连,无论之前是他早于我上线(他链接的我),还是我早于他上线(我链接的他)
             // 再次上线后,都变成我主动链接他
             const s = streams.get(id)
-            if (s.state !== peerState.OPEN) {
-                s.connect()
-            }
+            s.connect()
         } else {
             // 如果对方是首次上线,我方应该主动
             this.createPositive(id)
