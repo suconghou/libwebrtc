@@ -11,8 +11,9 @@ export default class extends event {
     }
 
     private createPassive(uid: string) {
-        const s = new peer(uid, true, this.servers, (e: MessageEvent) => {
-            this.trigger("message", {
+        // type message,open,close,error
+        const s = new peer(uid, true, this.servers, (type: string, e: MessageEvent) => {
+            this.trigger(type, {
                 uid,
                 e,
             })
@@ -22,8 +23,8 @@ export default class extends event {
     }
 
     private createPositive(uid: string) {
-        const s = new peer(uid, false, this.servers, (e: MessageEvent) => {
-            this.trigger("message", {
+        const s = new peer(uid, false, this.servers, (type: string, e: MessageEvent) => {
+            this.trigger(type, {
                 uid,
                 e,
             })

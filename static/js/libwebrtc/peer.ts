@@ -9,12 +9,14 @@ export default class {
         this.state = peerState.CONNECTING
         this.conn = new conn(id, servers, (type: string, e: MessageEvent) => {
             if (type == 'message') {
-                onmsg(e)
+                onmsg("message", e)
             } else if (type == 'open') {
                 this.state = peerState.OPEN
+                onmsg(type, e)
             } else {
                 // close, error
                 this.state = peerState.CLOSE
+                onmsg(type, e)
             }
         })
     }

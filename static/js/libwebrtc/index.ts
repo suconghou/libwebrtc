@@ -18,6 +18,9 @@ export default class extends event {
 			}
 			this.trigger("message", e)
 		})
+		this.m.register("open", (e) => this.trigger("open", e))
+		this.m.register("close", (e) => this.trigger("close", e))
+		this.m.register("error", (e) => this.trigger("error", e))
 		this.id = uuid()
 	}
 
@@ -83,7 +86,9 @@ export default class extends event {
 				this.onCandidate(data)
 			})
 			.listen('online', (data: any) => {
-				this.connectId(data.id)
+				if (data.id != this.id) {
+					this.connectId(data.id)
+				}
 			})
 			.listen('init', (data: any) => {
 				this.waitForIds(data.ids)

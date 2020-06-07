@@ -89,7 +89,9 @@ export default class extends libwebrtc {
 			u.push(uid)
 			clearTimeout(this.founderTimers[k])
 			this.founderTimers[k] = setTimeout(() => {
-				this.sendTo(u[Math.floor(Math.random() * u.length)], JSON.stringify({
+				const rr = u[Math.floor(Math.random() * u.length)]
+				console.info(rr, 'resolve', id, index)
+				this.sendTo(rr, JSON.stringify({
 					event: 'resolve',
 					data: {
 						id,

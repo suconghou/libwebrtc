@@ -114,14 +114,18 @@ export default class {
     }
 
     public async onAnswer(sdp: RTCSessionDescription) {
+        if (['closed'].includes(this.c.signalingState)) {
+            warn("onAnswer error signalingState is " + this.c.signalingState)
+            return
+        }
         await this.c.setRemoteDescription(sdp)
         info('setRemoteDescription', sdp)
         // 设置后,链接建立完毕
     }
 
     public async onCandidate(candidate: RTCIceCandidate) {
-        if (this.c.signalingState == 'closed') {
-            warn("onCandidate error signalingState is closed")
+        if (['closed'].includes(this.c.signalingState)) {
+            warn("onCandidate error signalingState is " + this.c.signalingState)
             return
         }
         this.c.addIceCandidate(candidate)
