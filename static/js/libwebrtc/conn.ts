@@ -31,6 +31,7 @@ export default class {
         this.c.ondatachannel = (ev: RTCDataChannelEvent) => {
             // 对方建立了 datachannel, 我方收到就维护起来
             this.dc = ev.channel
+            this.dc.binaryType = 'arraybuffer'
             this.dcInit()
             log(ev)
         }
