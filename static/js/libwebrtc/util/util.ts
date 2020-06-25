@@ -37,7 +37,7 @@ export const uuid = () => {
     return uid
 }
 
-const logevel = sessionStorage.getItem('loglevel') || 'warn'
+const logevel = sessionStorage.getItem('loglevel') || 'log'
 
 export const warn = ['warn', 'info', 'log'].includes(logevel) ? console.warn.bind(console) : () => { }
 export const info = ['info', 'log'].includes(logevel) ? console.info.bind(console) : () => { }

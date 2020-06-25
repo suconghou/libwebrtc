@@ -75,13 +75,14 @@ export default class {
         this.init()
         this.dc = this.c.createDataChannel("dc")
         this.dc.binaryType = 'arraybuffer'
-        window.addEventListener('beforeunload', () => {
-            this.dc.close()
-        })
         this.dcInit()
     }
 
     private dcInit() {
+        window.addEventListener('beforeunload', () => {
+            this.c.close()
+            this.dc.close()
+        })
         this.dc.onopen = (e) => {
             warn("dc open me : " + uuid() + " remote: " + this.id, e)
             this.onmsg('open', e);
@@ -94,6 +95,10 @@ export default class {
             warn("dc error " + this.id, e)
             this.onmsg('error', e);
         }
+        this.dc.addEventListener('closing', (e) => {
+            warn("dc closing " + this.id, e)
+            this.onmsg('closing', e);
+        })
         this.dc.onmessage = async (e) => {
             let data = e.data;
             if (data instanceof Blob) {

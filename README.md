@@ -175,3 +175,11 @@ iceConnectionState -> new
     广播API
     单个发送API
 3. 
+
+
+### 日志 
+
+设置 `sessionStorage`  `loglevel` 为 `log`
+
+
+

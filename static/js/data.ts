@@ -42,28 +42,32 @@ export default class extends libwebrtc {
 	async found(id: string, index: number) {
 		const resolve = this.resolver.get(id)
 		if (!resolve) {
+			console.warn("no resolve found for ", id)
 			return
 		}
 		const k = `${id}:${index}`
 		const buffer: ArrayBuffer = await resolve(id, index)
-		if (buffer) {
-			this.refBuffers.set(k, buffer)
-			const u = this.queries.get(k)
-			if (!u || !u.length) {
-				// 没有人查询过,或者都已回复过
-				return
-			}
-			u.forEach(uid => {
-				this.sendTo(uid, JSON.stringify({
-					event: 'found',
-					data: {
-						id,
-						index,
-					}
-				}))
-			})
-			this.queries.delete(k)
+		if (!buffer) {
+			console.warn("resolve has no buffer for ", id, index)
+			return
 		}
+		this.refBuffers.set(k, buffer)
+		const u = this.queries.get(k)
+		if (!u || !u.length) {
+			// 没有人查询过,或者都已回复过
+			return
+		}
+		u.forEach(uid => {
+			this.sendTo(uid, JSON.stringify({
+				event: 'found',
+				data: {
+					id,
+					index,
+				}
+			}))
+		})
+		this.queries.delete(k)
+
 	}
 
 	private listen() {
@@ -79,10 +83,12 @@ export default class extends libwebrtc {
 			await this.found(id, index)
 		})
 		this.register('found', ({ data, uid }) => {
-			// 多个客户响应了,选取前3个客户随机发送请求
+			// 多个客户响应了,选取前几个客户随机发送请求
 			const { id, index } = data
 			const k = `${id}:${index}`
 			let u = this.founders.get(k)
+			// 这些uid返回了他们持有这个资源
+			console.info(uid, " has ", k)
 			if (!u) {
 				return console.warn(k + " is already resolve")
 			}

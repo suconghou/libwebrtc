@@ -94,6 +94,7 @@ export default class extends event {
         const s = streams.get(uuid)
         if (!s) {
             console.error("uuid " + uuid + " not connected")
+            return
         }
         return s.send(data)
     }

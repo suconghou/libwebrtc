@@ -14,7 +14,7 @@ export default class {
                 this.state = peerState.OPEN
                 onmsg(type, e)
             } else {
-                // close, error
+                // close, error, closing
                 this.state = peerState.CLOSE
                 onmsg(type, e)
             }
