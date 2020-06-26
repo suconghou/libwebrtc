@@ -26,13 +26,13 @@ export const uuid = () => {
     if (uid) {
         return uid;
     }
-    uid = localStorage.getItem('uid')
+    uid = sessionStorage.getItem('uid')
     if (!uid || uid.length != 36) {
         function S4() {
             return (((1 + Math.random()) * 0x10000) | 0).toString(36)
         }
         uid = (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-        localStorage.setItem('uid', uid)
+        sessionStorage.setItem('uid', uid)
     }
     return uid
 }

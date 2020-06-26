@@ -122,6 +122,7 @@ export default class {
         await this.c.setRemoteDescription(sdp)
         const answer = await this.c.createAnswer()
         await this.c.setLocalDescription(answer)
+        // PeerConnection cannot create an answer in a state other than have-remote-offer or have-local-pranswer.
         const data = {
             event: "answer",
             from: uuid(),
