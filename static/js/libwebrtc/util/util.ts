@@ -12,7 +12,8 @@ export const ws = (ev?: any) => {
     const url = baseURL + uuid();
     return wsocket.getWs(
         url,
-        (data: any) => {
+        (event: any) => {
+            const data = JSON.parse(event.data)
             return {
                 ev: `${data.event}`,
                 data: data
