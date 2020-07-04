@@ -14,7 +14,7 @@ export default class extends libwebrtc {
 	private resolver: Map<string, Function> = new Map()
 	constructor(servers: RTCConfiguration) {
 		super(servers)
-		this.register('message', (e) => {
+		this.listen('message', (e) => {
 			const uid = e.uid;
 			const text = e.e.data;
 			try {
@@ -24,7 +24,7 @@ export default class extends libwebrtc {
 				console.error(e)
 			}
 		})
-		this.listen()
+		this.listenInit()
 	}
 
 	query(id: string, index: number, resolve: Function) {
@@ -70,8 +70,8 @@ export default class extends libwebrtc {
 
 	}
 
-	private listen() {
-		this.register('query', async ({ data, uid }) => {
+	private listenInit() {
+		this.listen('query', async ({ data, uid }) => {
 			const { id, index } = data
 			const k = `${id}:${index}`
 			const u = this.queries.get(k)
@@ -82,7 +82,7 @@ export default class extends libwebrtc {
 			}
 			await this.found(id, index)
 		})
-		this.register('found', ({ data, uid }) => {
+		this.listen('found', ({ data, uid }) => {
 			// 多个客户响应了,选取前几个客户随机发送请求
 			const { id, index } = data
 			const k = `${id}:${index}`
@@ -114,7 +114,7 @@ export default class extends libwebrtc {
 				this.founders.delete(k)
 			}, 100)
 		})
-		this.register('resolve', async ({ data, uid }) => {
+		this.listen('resolve', async ({ data, uid }) => {
 			const { id, index } = data
 			const buffer = this.refBuffers.get(`${id}:${index}`)
 			if (buffer) {
@@ -123,7 +123,7 @@ export default class extends libwebrtc {
 			return console.error("unresolved", id, index)
 		})
 
-		this.register('buffer', ({ id, uid, buffer }) => {
+		this.listen('buffer', ({ id, uid, buffer }) => {
 			let [idtag, index] = id.split('|')
 			index = Number(index)
 			this.trigger('data', {

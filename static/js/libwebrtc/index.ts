@@ -11,16 +11,16 @@ export default class extends event {
 	constructor(private readonly servers: RTCConfiguration) {
 		super()
 		this.m = new manager(servers)
-		this.m.register("message", (e) => {
+		this.m.listen("message", (e) => {
 			const data = e.e.data
 			if (data instanceof ArrayBuffer) {
 				return this.extract(data, e.uid);
 			}
 			this.trigger("message", e)
 		})
-		this.m.register("open", (e) => this.trigger("open", e))
-		this.m.register("close", (e) => this.trigger("close", e))
-		this.m.register("error", (e) => this.trigger("error", e))
+		this.m.listen("open", (e) => this.trigger("open", e))
+		this.m.listen("close", (e) => this.trigger("close", e))
+		this.m.listen("error", (e) => this.trigger("error", e))
 		this.id = uuid()
 	}
 
