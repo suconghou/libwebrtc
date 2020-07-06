@@ -100,17 +100,17 @@
 			app.members = members
 		}
 		setInterval(getMembers, 3000)
-		rtc.register("message", (e) => {
+		rtc.listen("message", (e) => {
 			app.items.push({
 				uid: e.uid,
 				text: e.e.data,
 				time: new Date(),
 			})
 		})
-		rtc.register('buffer.recv', (e) => {
+		rtc.listen('buffer.recv', (e) => {
 			console.log(e)
 		})
-		rtc.register('buffer', (e) => {
+		rtc.listen('buffer', (e) => {
 			console.log(e)
 		})
 

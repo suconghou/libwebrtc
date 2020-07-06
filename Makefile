@@ -1,3 +1,5 @@
+dev:
+	parcel index.html
 build:
 	cd static/js/libwebrtc && \
 	tsc -t es2017 index.ts && \
