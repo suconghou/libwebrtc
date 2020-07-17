@@ -2,7 +2,7 @@ import { ws, uuid, concatArrayBuffers, str2ab, ab2str, padRight } from './util/u
 import event from './util/event'
 import manager from './manager'
 
-const s = 102400
+const s = 51200
 
 export default class extends event {
 	private m: manager
@@ -28,6 +28,7 @@ export default class extends event {
 		try {
 			let meta = ab2str(data.slice(0, 60)).trim()
 			if (!/^[!-~]+$/.test(meta)) {
+				// 不是我们的分片数据直接交由其他程序处理
 				this.trigger('message.buffer', { data, uid })
 				return
 			}
@@ -41,6 +42,7 @@ export default class extends event {
 				b[i] = buffer
 				this.buffers.set(id, b)
 			}
+			// 分片协议前缀 ["id",i,n] ,分片传输中,可用于进度提示
 			this.trigger('buffer.recv', {
 				id,
 				buffer,

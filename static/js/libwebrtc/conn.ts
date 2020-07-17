@@ -24,7 +24,7 @@ export default class {
                 ws().sendJson({ event: 'offer', to: this.id, from: uuid(), data: offer })
                 log(offer)
             } catch (e) {
-                console.error(e)
+                warn(e)
             }
         }
 
@@ -39,7 +39,7 @@ export default class {
             log(ev)
         }
         this.c.onicecandidateerror = (ev: RTCPeerConnectionIceErrorEvent) => {
-            log(ev)
+            warn(ev)
         }
 
         this.c.onicegatheringstatechange = (ev: Event) => {
@@ -162,13 +162,20 @@ export default class {
             warn("data channel to " + this.id + " is not open")
             return
         }
-        const r = this.dc.send(data)
-        if (data instanceof ArrayBuffer) {
-            this.tx += data.byteLength
-        } else {
-            this.tx += data.length
+        try {
+            const r = this.dc.send(data)
+            if (data instanceof ArrayBuffer) {
+                this.tx += data.byteLength
+            } else {
+                this.tx += data.length
+            }
+            return r
+        } catch (e) {
+            warn(e)
+            // 尝试重新建立连接
+            this.connect()
         }
-        return r
+
     }
 
     stat() {
