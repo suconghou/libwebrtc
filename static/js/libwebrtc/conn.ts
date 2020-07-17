@@ -149,17 +149,17 @@ export default class {
             return
         }
         this.c.addIceCandidate(candidate)
-        info("made connection ", this.id)
+        log("made connection ", this.id)
     }
 
 
     send(data: any) {
         if (!this.dc) {
-            warn("data channel to " + this.id + " is not avaiable")
+            log("data channel to " + this.id + " is not avaiable")
             return
         }
         if (this.dc.readyState !== 'open') {
-            warn("data channel to " + this.id + " is not open")
+            log("data channel to " + this.id + " is not open")
             return
         }
         try {

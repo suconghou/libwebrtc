@@ -70,7 +70,26 @@ export default class extends libwebrtc {
 
 	}
 
+	private quit(uid: string, id: string, index: number) {
+		this.sendTo(uid, JSON.stringify({
+			event: 'quit',
+			data: {
+				id,
+				index,
+			}
+		}))
+	}
+
 	private listenInit() {
+		const quitList = {}
+		this.listen("quit", async ({ data, uid }) => {
+			const { id, index } = data
+			quitList[`${id}|${index}`] = {
+				time: +new Date(),
+				uid,
+			}
+			// console.info(quitList, data, uid)
+		})
 		this.listen('query', async ({ data, uid }) => {
 			const { id, index } = data
 			const k = `${id}:${index}`
@@ -88,7 +107,7 @@ export default class extends libwebrtc {
 			const k = `${id}:${index}`
 			let u = this.founders.get(k)
 			// 这些uid返回了他们持有这个资源
-			console.info(uid, " has ", k)
+			// console.info(uid, " has ", k)
 			if (!u) {
 				return console.warn(k + " is already resolve")
 			}
@@ -118,11 +137,31 @@ export default class extends libwebrtc {
 			const { id, index } = data
 			const buffer = this.refBuffers.get(`${id}:${index}`)
 			if (buffer) {
-				return this.sendBuffer(uid, buffer, `${id}|${index}`)
+				const bufferKey = `${id}|${index}`
+				return await this.sendBuffer(uid, buffer, bufferKey, () => {
+					const has = quitList[bufferKey]
+					if (has && uid == has.uid && +new Date() - has.time < 60e3) {
+						has.time = 0
+						return true
+					}
+				})
 			}
 			return console.error("unresolved", id, index)
 		})
-
+		this.listen('buffer.recv', async (res) => {
+			this.trigger('buffer.progress', res)
+			// 当resolve时,http还未下载或未下载完成,但是收到rtc分片时,http已完成,则取消剩余分片
+			const [id, index] = res.id.split('|')
+			// id 为资源 vid:itag , index 为range分片ID
+			const resolve = this.resolver.get(id)
+			if (resolve) {
+				const has = await resolve(id, index)
+				if (has) {
+					// console.warn("quit buffer recv", res)
+					this.quit(res.uid, id, index)
+				}
+			}
+		})
 		this.listen('buffer', ({ id, uid, buffer }) => {
 			let [idtag, index] = id.split('|')
 			index = Number(index)
@@ -132,6 +171,7 @@ export default class extends libwebrtc {
 				buffer,
 			})
 		})
+
 	}
 
 }

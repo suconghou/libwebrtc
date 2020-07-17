@@ -38,6 +38,14 @@ export const uuid = () => {
     return uid
 }
 
+
+export const sleep = async (ms: number) => {
+    return new Promise(resolve => {
+        setTimeout(resolve, ms);
+    });
+};
+
+
 const logevel = sessionStorage.getItem('loglevel') || 'warn'
 
 export const warn = ['warn', 'info', 'log'].includes(logevel) ? console.warn.bind(console) : () => { }

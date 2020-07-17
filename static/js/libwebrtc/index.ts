@@ -1,4 +1,4 @@
-import { ws, uuid, concatArrayBuffers, str2ab, ab2str, padRight } from './util/util'
+import { ws, uuid, concatArrayBuffers, str2ab, ab2str, padRight, sleep } from './util/util'
 import event from './util/event'
 import manager from './manager'
 
@@ -117,11 +117,18 @@ export default class extends event {
 		return this.m.getStats()
 	}
 
-	sendBuffer(uuid: string, data: ArrayBuffer, id: string) {
+	async sendBuffer(uuid: string, data: ArrayBuffer, id: string, cancel: Function) {
 		const datas = this.splitBuffer(data, id)
-		datas.forEach(item => {
+		for (let i = 0; i < datas.length; i++) {
+			const item = datas[i]
+			const c = cancel(i, item)
+			// console.warn("is quit send buffer", id, c)
+			if (c) {
+				return
+			}
 			this.sendTo(uuid, item.data)
-		})
+			await sleep(500)
+		}
 	}
 
 	broadcastBuffer(data: ArrayBuffer, id: string) {
