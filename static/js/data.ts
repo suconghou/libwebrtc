@@ -39,9 +39,12 @@ export default class extends libwebrtc {
 		}))
 	}
 
+	// 1. 每次我们取到数据块后在此声明,发送给查询过此数据块的用户
+	// 2. 如果有用户查询时,我们也调用此函数检查
 	async found(id: string, index: number) {
 		const resolve = this.resolver.get(id)
 		if (!resolve) {
+			// 用户查询的这个资源我们从来没接触过,更别提里面的数据块了.
 			console.warn("no resolve found for ", id)
 			return
 		}
@@ -88,7 +91,7 @@ export default class extends libwebrtc {
 				time: +new Date(),
 				uid,
 			}
-			// console.info(quitList, data, uid)
+			// console.info('got quit msg ', quitList, data, uid)
 		})
 		this.listen('query', async ({ data, uid }) => {
 			const { id, index } = data
@@ -141,6 +144,7 @@ export default class extends libwebrtc {
 				return await this.sendBuffer(uid, buffer, bufferKey, () => {
 					const has = quitList[bufferKey]
 					if (has && uid == has.uid && +new Date() - has.time < 60e3) {
+						// console.log("so stop send to ", uid, bufferKey)
 						has.time = 0
 						return true
 					}
@@ -157,7 +161,7 @@ export default class extends libwebrtc {
 			if (resolve) {
 				const has = await resolve(id, index)
 				if (has) {
-					// console.warn("quit buffer recv", res)
+					// console.warn("send quit buffer recv msg", res)
 					this.quit(res.uid, id, index)
 				}
 			}

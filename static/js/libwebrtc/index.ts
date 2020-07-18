@@ -121,9 +121,7 @@ export default class extends event {
 		const datas = this.splitBuffer(data, id)
 		for (let i = 0; i < datas.length; i++) {
 			const item = datas[i]
-			const c = cancel(i, item)
-			// console.warn("is quit send buffer", id, c)
-			if (c) {
+			if (cancel(i, item)) {
 				return
 			}
 			this.sendTo(uuid, item.data)
