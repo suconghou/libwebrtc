@@ -82,7 +82,7 @@ export default class {
     // 我主动链接这个ID
     async connect() {
         log("i connect ", this.id)
-        if (this.dc && this.dc.readyState == 'open') {
+        if (this.c && this.c.connectionState == 'connected' && this.dc && this.dc.readyState == 'open') {
             info("connection to ", this.id, " is already open")
             // 对方刷新时,我方执行此逻辑;这个到底是不是链接着的,我们再发送一个ping探测一下
             this.send(JSON.stringify({ event: 'ping' }))
@@ -206,6 +206,7 @@ export default class {
             tx: this.tx,
             rx: this.rx,
             state: this.dc ? this.dc.readyState : '',
+            cstate: this.c ? this.c.connectionState : '',
         }
     }
 
