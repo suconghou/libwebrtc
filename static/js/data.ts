@@ -85,6 +85,13 @@ export default class extends libwebrtc {
 
 	private listenInit() {
 		const quitList = {}
+		this.listen('ping', ({ uid }) => {
+			console.info("got ping from ", uid)
+			this.sendTo(uid, JSON.stringify({ event: 'pong' }))
+		})
+		this.listen('pong', ({ uid }) => {
+			console.info("got pong from ", uid)
+		})
 		this.listen("quit", async ({ data, uid }) => {
 			const { id, index } = data
 			quitList[`${id}|${index}`] = {
