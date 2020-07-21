@@ -207,6 +207,8 @@ export default class {
             rx: this.rx,
             state: this.dc ? this.dc.readyState : '',
             cstate: this.c ? this.c.connectionState : '',
+            istate: this.c ? this.c.iceConnectionState : '',
+            gstate: this.c ? this.c.iceGatheringState : '',
         }
     }
 
