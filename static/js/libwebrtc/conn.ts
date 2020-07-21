@@ -14,6 +14,13 @@ export default class {
     }
 
     private init() {
+        if (this.c) {
+            try {
+                this.c.close()
+            } catch (e) {
+                log(e)
+            }
+        }
         this.c = new RTCPeerConnection(this.servers);
         this.c.onnegotiationneeded = async (ev: Event) => {
             log(ev)
@@ -30,6 +37,13 @@ export default class {
 
         this.c.ondatachannel = (ev: RTCDataChannelEvent) => {
             // 对方建立了 datachannel, 我方收到就维护起来
+            if (this.dc) {
+                try {
+                    this.dc.close()
+                } catch (e) {
+                    log(e)
+                }
+            }
             this.dc = ev.channel
             this.dc.binaryType = 'arraybuffer'
             this.dcInit()
@@ -75,6 +89,13 @@ export default class {
             return
         }
         this.init()
+        if (this.dc) {
+            try {
+                this.dc.close()
+            } catch (e) {
+                log(e)
+            }
+        }
         this.dc = this.c.createDataChannel("dc")
         this.dc.binaryType = 'arraybuffer'
         this.dcInit()
