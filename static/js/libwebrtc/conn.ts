@@ -9,6 +9,8 @@ export default class {
 
     private rx: number = 0
 
+    private restart = 0
+
     constructor(private readonly id: string, private readonly servers: RTCConfiguration, private readonly onmsg: Function) {
         this.init()
     }
@@ -82,23 +84,28 @@ export default class {
     // 我主动链接这个ID
     async connect() {
         log("i connect ", this.id)
+        const connect = () => {
+            this.init()
+            if (this.dc) {
+                try {
+                    this.dc.close()
+                } catch (e) {
+                    log(e)
+                }
+            }
+            this.dc = this.c.createDataChannel("dc")
+            this.dc.binaryType = 'arraybuffer'
+            this.dcInit()
+        }
         if (this.c && this.c.connectionState == 'connected' && this.dc && this.dc.readyState == 'open') {
             info("connection to ", this.id, " is already open")
             // 对方刷新时,我方执行此逻辑;这个到底是不是链接着的,我们再发送一个ping探测一下
             this.send(JSON.stringify({ event: 'ping' }))
+            clearTimeout(this.restart)
+            this.restart = setTimeout(() => connect(), 5e3)
             return
         }
-        this.init()
-        if (this.dc) {
-            try {
-                this.dc.close()
-            } catch (e) {
-                log(e)
-            }
-        }
-        this.dc = this.c.createDataChannel("dc")
-        this.dc.binaryType = 'arraybuffer'
-        this.dcInit()
+        connect();
     }
 
     private dcInit() {
@@ -123,6 +130,7 @@ export default class {
             this.onmsg('closing', e);
         })
         this.dc.onmessage = async (e) => {
+            clearTimeout(this.restart)
             let data = e.data;
             if (data instanceof Blob) {
                 // 火狐浏览器始终是blob格式,这里修正
