@@ -1,5 +1,5 @@
 import wsocket from './ws'
-const baseURL = localStorage.getItem('ws') || 'wss://ws-suconghou.cloud.okteto.net/channel/uid/'
+const baseURL = localStorage.getItem('ws') || 'wss://ws.feds.club/uid/'
 let uid = '';
 export const ws = (ev?: any) => {
     let event = '';
