@@ -1,4 +1,3 @@
-import { peerConn, peerState } from './types'
 import peer from './peer'
 import event from './util/event'
 

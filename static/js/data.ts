@@ -1,4 +1,5 @@
 import libwebrtc from "./libwebrtc/index";
+import { warn, info } from './libwebrtc/util/util'
 
 /**
  * query 全网查询, {id,index, }
@@ -45,13 +46,13 @@ export default class extends libwebrtc {
 		const resolve = this.resolver.get(id)
 		if (!resolve) {
 			// 用户查询的这个资源我们从来没接触过,更别提里面的数据块了.
-			console.warn("no resolve found for ", id)
+			warn("no resolve found for ", id)
 			return
 		}
 		const k = `${id}:${index}`
 		const buffer: ArrayBuffer = await resolve(id, index)
 		if (!buffer) {
-			console.warn("resolve has no buffer for ", id, index)
+			warn("resolve has no buffer for ", id, index)
 			return
 		}
 		this.refBuffers.set(k, buffer)
@@ -86,11 +87,11 @@ export default class extends libwebrtc {
 	private listenInit() {
 		const quitList = {}
 		this.listen('ping', ({ uid }) => {
-			console.info("got ping from ", uid)
+			info("got ping from ", uid)
 			this.sendTo(uid, JSON.stringify({ event: 'pong' }))
 		})
 		this.listen('pong', ({ uid }) => {
-			console.info("got pong from ", uid)
+			info("got pong from ", uid)
 		})
 		this.listen("quit", async ({ data, uid }) => {
 			const { id, index } = data
@@ -98,7 +99,7 @@ export default class extends libwebrtc {
 				time: +new Date(),
 				uid,
 			}
-			// console.info('got quit msg ', quitList, data, uid)
+			// info('got quit msg ', quitList, data, uid)
 		})
 		this.listen('query', async ({ data, uid }) => {
 			const { id, index } = data
@@ -117,9 +118,9 @@ export default class extends libwebrtc {
 			const k = `${id}:${index}`
 			let u = this.founders.get(k)
 			// 这些uid返回了他们持有这个资源
-			// console.info(uid, " has ", k)
+			// info(uid, " has ", k)
 			if (!u) {
-				return console.warn(k + " is already resolve")
+				return warn(k + " is already resolve")
 			}
 			u.push(uid)
 			clearTimeout(this.founderTimers[k])
@@ -151,7 +152,7 @@ export default class extends libwebrtc {
 				return await this.sendBuffer(uid, buffer, bufferKey, () => {
 					const has = quitList[bufferKey]
 					if (has && uid == has.uid && +new Date() - has.time < 60e3) {
-						// console.log("so stop send to ", uid, bufferKey)
+						// log("so stop send to ", uid, bufferKey)
 						has.time = 0
 						return true
 					}
@@ -168,7 +169,7 @@ export default class extends libwebrtc {
 			if (resolve) {
 				const has = await resolve(id, index)
 				if (has) {
-					// console.warn("send quit buffer recv msg", res)
+					// log("send quit buffer recv msg", res)
 					this.quit(res.uid, id, index)
 				}
 			}

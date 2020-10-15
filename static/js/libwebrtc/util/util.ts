@@ -46,7 +46,7 @@ export const sleep = async (ms: number) => {
 };
 
 
-const logevel = sessionStorage.getItem('loglevel') || 'warn'
+const logevel = sessionStorage.getItem('loglevel')
 
 export const warn = ['warn', 'info', 'log'].includes(logevel) ? console.warn.bind(console) : () => { }
 export const info = ['info', 'log'].includes(logevel) ? console.info.bind(console) : () => { }
