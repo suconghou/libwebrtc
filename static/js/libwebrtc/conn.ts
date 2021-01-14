@@ -93,7 +93,7 @@ export default class {
                     log(e)
                 }
             }
-            this.dc = this.c.createDataChannel("dc")
+            this.dc = this.c.createDataChannel("dc", { maxPacketLifeTime: 2000 })
             this.dc.binaryType = 'arraybuffer'
             this.dcInit()
         }

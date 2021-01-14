@@ -26,13 +26,14 @@ export default class extends event {
 
 	private extract(data: ArrayBuffer, uid: string) {
 		try {
-			let meta = ab2str(data.slice(0, 60)).trim()
+			const headerLen = 30
+			let meta = ab2str(data.slice(0, headerLen)).trim()
 			if (!/^[!-~]+$/.test(meta)) {
 				// 不是我们的分片数据直接交由其他程序处理
 				this.trigger('message.buffer', { data, uid })
 				return
 			}
-			const buffer = data.slice(60)
+			const buffer = data.slice(headerLen)
 			const [id, i, n] = JSON.parse(meta)
 			const item = this.buffers.get(id)
 			if (item) {
