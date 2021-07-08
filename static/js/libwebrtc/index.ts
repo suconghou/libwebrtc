@@ -1,4 +1,4 @@
-import { ws, uuid, concatArrayBuffers, str2ab, ab2str, padRight, sleep } from './util/util'
+import { ws, uuid, concatArrayBuffers, str2ab, ab2str, padRight, sleep, info } from './util/util'
 import event from './util/event'
 import manager from './manager'
 
@@ -28,6 +28,7 @@ export default class extends event {
 		try {
 			const headerLen = 30
 			let meta = ab2str(data.slice(0, headerLen)).trim()
+			info(meta)
 			if (!/^[!-~]+$/.test(meta)) {
 				// 不是我们的分片数据直接交由其他程序处理
 				this.trigger('message.buffer', { data, uid })
@@ -39,7 +40,7 @@ export default class extends event {
 			if (item) {
 				item[i] = buffer
 			} else {
-				const b = []
+				const b: Array<ArrayBuffer> = []
 				b[i] = buffer
 				this.buffers.set(id, b)
 			}
