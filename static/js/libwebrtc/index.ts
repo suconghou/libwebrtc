@@ -81,21 +81,21 @@ export default class extends event {
 	init() {
 		ws()
 			.listen('offer', (data: any) => {
-				this.onOffer(data)
+				this.m.onOffer(data.from, data.data)
 			})
 			.listen("answer", (data: any) => {
-				this.onAnswer(data)
+				this.m.onAnswer(data.from, data.data)
 			})
 			.listen("candidate", (data: any) => {
-				this.onCandidate(data)
+				this.m.onCandidate(data.from, data.data)
 			})
 			.listen('online', (data: any) => {
 				if (data.id != this.id) {
-					this.connectId(data.id)
+					this.m.ensureToConnect(data.id)
 				}
 			})
 			.listen('init', (data: any) => {
-				this.waitForIds(data.ids)
+				this.m.ensureWaitIds(data.ids)
 			})
 	}
 
@@ -152,7 +152,7 @@ export default class extends event {
 			}
 			const v = data.slice(start, end)
 			let str = JSON.stringify([
-				id.substr(0, 20),
+				id.substring(0, 20),
 				i,
 				n,
 			]);
@@ -168,27 +168,6 @@ export default class extends event {
 				return datas;
 			}
 		}
-	}
-
-	private onOffer(data: any) {
-		this.m.onOffer(data.from, data.data)
-	}
-
-
-	private onAnswer(data: any) {
-		this.m.onAnswer(data.from, data.data)
-	}
-
-	private onCandidate(data: any) {
-		this.m.onCandidate(data.from, data.data)
-	}
-
-	private connectId(id: string) {
-		this.m.ensureToConnect(id)
-	}
-
-	private waitForIds(ids: Array<string>) {
-		this.m.ensureWaitIds(ids)
 	}
 
 }
