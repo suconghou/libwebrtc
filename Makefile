@@ -1,6 +1,6 @@
 dev:
 	parcel index.html
 build:
-	cd static/js/libwebrtc && \
+	cd src/libwebrtc && \
 	tsc -t es2017 index.ts && \
 	rollup index.js -o ../libwebrtc.js -n libwebrtc -f es

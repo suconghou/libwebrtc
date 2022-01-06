@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
 	<title>WebRtc</title>
-	<link rel="stylesheet" href="./static/css/style.less" />
+	<link rel="stylesheet" href="./static/style.less" />
 </head>
 
 <body>
@@ -52,7 +52,7 @@
 			</div>
 		</div>
 	</div>
-	<script src="./static/js/main.js"></script>
+	<script type="module" src="./src/main.js"></script>
 	<script src="https://lib.baomitu.com/vue/2.6.11/vue.min.js"></script>
 	<script>
 		const app = new Vue({
@@ -64,6 +64,25 @@
 					txt: "",
 					to: "",
 				}
+			},
+			mounted() {
+				setTimeout(() => {
+					const rtc = window.rtc
+					rtc.listen("message", (e) => {
+						app.items.push({
+							uid: e.uid,
+							text: e.e.data,
+							time: new Date(),
+						})
+					})
+					rtc.listen('buffer.recv', (e) => {
+						console.log(e)
+					})
+					rtc.listen('buffer', (e) => {
+						console.log(e)
+					})
+				}, 100)
+
 			},
 			methods: {
 				send() {
@@ -100,19 +119,6 @@
 			app.members = members
 		}
 		setInterval(getMembers, 3000)
-		rtc.listen("message", (e) => {
-			app.items.push({
-				uid: e.uid,
-				text: e.e.data,
-				time: new Date(),
-			})
-		})
-		rtc.listen('buffer.recv', (e) => {
-			console.log(e)
-		})
-		rtc.listen('buffer', (e) => {
-			console.log(e)
-		})
 
 	</script>
 </body>
